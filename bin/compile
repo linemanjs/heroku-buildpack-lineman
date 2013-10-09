@@ -174,7 +174,7 @@ export CPPPATH="$INCLUDE_PATH"
 
 # install dependencies with npm
 echo "-----> Installing dependencies with npm"
-run_npm "install --production"
+run_npm "install"
 run_npm "rebuild"
 # if lineman wasn't in the package.json we need to locally install the latest verison now
 if [ ! -f $BUILD_DIR/node_modules/.bin/lineman ]; then
