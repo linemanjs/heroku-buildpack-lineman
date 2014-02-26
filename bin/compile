@@ -250,6 +250,16 @@ run_npm "prune --production"
 #######################
 ## 3. Apache Setup   ##
 #######################
+# install apache if needed. only if Procfile doesn't have a web process
+echo "-----> Checking for Procfile and web process"
+if [ -f Procfile ]; then
+  echo "Procile exists...checking for web process" | indent
+  if [ `grep -o 'web:' Procfile` ]; then
+    echo "Found web process. No need to bundle Apache." | indent
+    exit 0
+  fi
+fi
+
 
 # config
 APACHE_VERSION="2.2.19"
@@ -270,12 +280,14 @@ for DIR in $APACHE_PATH $PHP_PATH ; do
   fi
 done
 
-# install apache if needed
+
+
 if [ ! -d $APACHE_PATH ]; then
   APACHE_URL="https://s3.amazonaws.com/php-lp/apache-$APACHE_VERSION.tar.gz"
   echo "-----> Bundling Apache v$APACHE_VERSION"
   curl --silent --max-time 60 --location $APACHE_URL | tar xz
 fi
+
 
 #copy in the httpd.conf from the buildpack
 # copy the provided configuration and tack on any user configuration in config/httpd.conf
@@ -285,13 +297,16 @@ fi
 test -d $BUILD_DIR/apache_modules && cp $BUILD_DIR/apache_modules/* $APACHE_PATH/modules/
 
 cat >>boot.sh <<EOF
-export LD_LIBRARY_PATH=/app/apache/lib/
-if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
-  /app/apache/bin/htpasswd -bc /app/.passwords \$USERNAME \$PASSWORD
-fi
-sed -i 's/Listen 80/Listen '\$PORT'/' /app/apache/conf/httpd.conf
-echo "Launching apache"
-exec /app/apache/bin/httpd -X
+  export LD_LIBRARY_PATH=/app/apache/lib/
+  if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
+    /app/apache/bin/htpasswd -bc /app/.passwords \$USERNAME \$PASSWORD
+  fi
+  sed -i 's/Listen 80/Listen '\$PORT'/' /app/apache/conf/httpd.conf
+  echo "Launching apache"
+  exec /app/apache/bin/httpd -X
 EOF
 
 chmod +x boot.sh
+
+
+
