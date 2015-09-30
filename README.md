@@ -1,3 +1,9 @@
+**Update 9/30/2015:** This buildpack will cease to work on 11/4/2015 when Heroku switches to cedar-14. Please migrate to cedar-14 by using @hone's static buildpack. Here is an [example Lineman project using his buildpack](https://github.com/hone/lineman.js-on-Heroku).
+
+
+Old docs continue:
+
+
 Heroku buildpack: Lineman
 =========================
 
